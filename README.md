@@ -1,24 +1,6 @@
 # LAMP devstack Docker images
 Images for local development in [LAMP devstack](https://en.wikipedia.org/wiki/LAMP_(software_bundle))
 
-* [Built images](#built-images)
-* [Main features](#main-features)
-* [Basic usage](#basic-usage)
-    + [Version tags](#version-tags)
-    + [Using MySQL](#using-mysql)
-    + [Windows issue](#windows-issue)
-* [Extended configuration](#extended-configuration)
-    + [PHP configuration](#php-configuration) 
-    + [Document Root](#document-root)
-    + [Timezone](#timezone)
-    + [Temporary, upload and session storage directory](#temporary-upload-and-session-storage-directory)
-    + [Apache – listening port](#apache--listening-port)
-    + [Other PHP configurations](#other-php-configurations)
-* [Advanced usage](#advanced-usage)
-    + [Xdebug](#xdebug)
-    + [Debugging CLI with PhpStorm](#debugging-cli-with-phpstorm)
-* [Building notes](#building-notes)
-
 
 ## Built images
 
@@ -27,11 +9,8 @@ Images for local development in [LAMP devstack](https://en.wikipedia.org/wiki/LA
 
 ## Main features
 - architecture: `linux/amd64`
-- current **PHP** versions: 8.3, 8.2 and 8.1
-- unsupported **PHP** versions also available: 8.0, 7.4, 7.3, 7.2, 7.1, 7.0, 5.6, 5.5 and 5.4 (with limited stability,
-unoptimized, unmaintained)
-- current versions of **MariaDB** 11.2, 11.1, 11.0, 10.11, 10.10, 10.6, 10.5, 10.4, 10.3 and RC pre-release of 11.3
-- unsupported versions of **MariaDB** 10.9, 10.8 and 10.7 (unmaintained)
+- current **PHP** version: 8.3
+- current version of **MariaDB** 11.3
 - current version of **Apache** 2.4 (in non-CLI images)
 - current version of **Xdebug** 3.3
 - extra PHP extensions:
@@ -58,12 +37,12 @@ unoptimized, unmaintained)
 - Apache modules: [`expires`](https://httpd.apache.org/docs/current/mod/mod_expires.html),
     [`headers`](https://httpd.apache.org/docs/current/mod/mod_headers.html) and
     [`rewrite`](https://httpd.apache.org/docs/current/mod/mod_rewrite.html)
-- Apache `DocumentRoot` changed to: `/var/www/html/www` (configurable by [ENV](#document-root))
+- Apache `DocumentRoot` `/var/www/html/` (configurable by [ENV](#document-root))
 - PHP image comes with [Composer 2.6+](https://getcomposer.org/) and [Git 2.43+](https://git-scm.com/) to 
     use it in guest shell  
 - MySQL properly configured to use `utf8mb4` as a default charset, an optional support of Windows Host is also available
 - timezones are correctly supported
-- optimized for small image size and short load times
+- optimized for small image size and short load times (cough. This needs improving)
 
 
 ## Basic usage
@@ -87,71 +66,13 @@ my_project/                 <-- project's root
             photo1.jpg      <-- accessible at http://localhost:8080/gallery/photo1.jpg
     vendor/
         autoload.php        <-- not accessible but PHP can via: require(__DIR__ . '/../vendor/autoload.php')
+    config/
+        config.php          <-- any files in the config directory are copied to the container at /config
 ```
-
-### Version tags
-
-Images are tagged by the cascaded SemVer:
-- `jakubboucek/lamp-devstack-php:latest` – means `latest` available stable PHP image,
-- `jakubboucek/lamp-devstack-php:8` – represents the highest PHP image of `8` version, but lower than `9.0.0`,
-- `jakubboucek/lamp-devstack-php:8.3` – represents the highest PHP image of `8.3` version, but lower than `8.4.0`,
-- `jakubboucek/lamp-devstack-php:8.3.0` – represents most specific PHP image, directly version `8.3.0`.
-
-**Legacy PHP** images are tagged using different strategy, only latest revision for each minor version is available,
-use `-legacy` tag suffix:
-
-- `jakubboucek/lamp-devstack-php:8.0-legacy`
-- `jakubboucek/lamp-devstack-php:7.4-legacy`
-- `jakubboucek/lamp-devstack-php:7.3-legacy`
-- `jakubboucek/lamp-devstack-php:7.2-legacy`
-- `jakubboucek/lamp-devstack-php:7.1-legacy`
-- `jakubboucek/lamp-devstack-php:7.0-legacy`
-- `jakubboucek/lamp-devstack-php:5.6-legacy`
-- `jakubboucek/lamp-devstack-php:5.5-legacy`
-- `jakubboucek/lamp-devstack-php:5.4-legacy-fixed`
-
-> Note: Version 5.4 is using `-fixed` suffix because is unable to rebuild them from scratch. 
-
-All PHP images have alternative variants with XDebug extension preinstalled, use `-debug` tag suffix, example:
-- `jakubboucek/lamp-devstack-php:debug`
-- `jakubboucek/lamp-devstack-php:8-debug`
-- `jakubboucek/lamp-devstack-php:8.3-debug`
-- `jakubboucek/lamp-devstack-php:8.3.0-debug`
-- `jakubboucek/lamp-devstack-php:7.4-legacy-debug`
-
->  Note: (Pre-release of PHP 8.3 contains unstable version of Xdebug)
-
-All PHP images also have alternative CLI variants, use `-cli` tag suffix, example:
-- `jakubboucek/lamp-devstack-php:cli`
-- `jakubboucek/lamp-devstack-php:8-cli`
-- `jakubboucek/lamp-devstack-php:8.3-cli`
-- `jakubboucek/lamp-devstack-php:8.3.0-cli`
-- `jakubboucek/lamp-devstack-php:7.4-legacy-cli`
 
 
 ### Using MySQL
 MySQL server starts at the same time as the web server.
-
-Available MySQL images:
-
-- 10.3: `jakubboucek/lamp-devstack-mysql:10.3`
-- 10.4: `jakubboucek/lamp-devstack-mysql:10.4`
-- 10.5: `jakubboucek/lamp-devstack-mysql:10.5`
-- 10.6: `jakubboucek/lamp-devstack-mysql:10.6`
-- 10.10: `jakubboucek/lamp-devstack-mysql:10.10`
-- 10.11: `jakubboucek/lamp-devstack-mysql:10.11`
-- 11.0: `jakubboucek/lamp-devstack-mysql:11.0`
-- 11.1: `jakubboucek/lamp-devstack-mysql:11.1`
-- 11.2: `jakubboucek/lamp-devstack-mysql:latest`
-
-LTS (long-term support) MySQL images (currently 10.11):
-
-- `jakubboucek/lamp-devstack-mysql:10-lts`
-- `jakubboucek/lamp-devstack-mysql:lts`
-
-The RC pre-release of MySQL 11.3 images have the `-rc` suffix, example:
-- `jakubboucek/lamp-devstack-mysql:11.3-rc`
-- `jakubboucek/lamp-devstack-mysql:11.3-1-rc`
 
 Default credentials:
 - user: `root`
