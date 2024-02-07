@@ -14,35 +14,28 @@ Images for local development in [LAMP devstack](https://en.wikipedia.org/wiki/LA
 - current version of **Apache** 2.4 (in non-CLI images)
 - current version of **Xdebug** 3.3
 - extra PHP extensions:
-    [`bmath`](https://www.php.net/manual/en/book.bc.php),
+    [`bcmath`](https://www.php.net/manual/en/book.bc.php),
     [`bz2`](https://www.php.net/manual/en/book.bzip2.php),
     [`calendar`](https://www.php.net/manual/en/book.calendar.php),
     [`exif`](https://www.php.net/manual/en/book.exif.php),
-    [`gd`](https://www.php.net/manual/en/book.image.php) with PNG, WebP, AVIF (for PHP 8.1+), FreeType fonts support
+    [`gd`](https://www.php.net/manual/en/book.image.php),
     [`gettext`](https://www.php.net/manual/en/book.gettext.php),
     [`gmp`](https://www.php.net/manual/en/book.gmp.php),
-    [`imap`](https://www.php.net/manual/en/book.imap.php),
     [`intl`](https://www.php.net/manual/en/book.intl.php),
     [`memcached`](https://www.php.net/manual/en/book.memcached.php),
     [`mysqli`](https://www.php.net/manual/en/book.mysqli.php),
-    [`pdo_mysql`](https://www.php.net/manual/en/book.pdo.php),
     [`opcache`](https://www.php.net/manual/en/book.opcache.php),
     [`pcntl`](https://www.php.net/manual/en/book.pcntl.php),
-    [`semaphore`](https://www.php.net/manual/en/book.sem.php),
     [`sockets`](https://www.php.net/manual/en/book.sockets.php),
-    [`soap`](https://www.php.net/manual/en/book.soap.php),
     [`sodium`](https://www.php.net/manual/en/book.sodium.php),
     [`xsl`](https://www.php.net/manual/en/book.xsl.php) and
     [`zip`](https://www.php.net/manual/en/book.zip.php)
-- Apache modules: [`expires`](https://httpd.apache.org/docs/current/mod/mod_expires.html),
-    [`headers`](https://httpd.apache.org/docs/current/mod/mod_headers.html) and
+- Apache modules: 
     [`rewrite`](https://httpd.apache.org/docs/current/mod/mod_rewrite.html)
 - Apache `DocumentRoot` `/var/www/html/` (configurable by [ENV](#document-root))
-- PHP image comes with [Composer 2.6+](https://getcomposer.org/) and [Git 2.43+](https://git-scm.com/) to 
-    use it in guest shell  
 - MySQL properly configured to use `utf8mb4` as a default charset, an optional support of Windows Host is also available
 - timezones are correctly supported
-- optimized for small image size and short load times (cough. This needs improving)
+- optimized for small image size and short load times (?)
 
 
 ## Basic usage
@@ -197,7 +190,7 @@ environment:
 The `TZ` environment variable is recognized by Linux tools as well. By creating the variable you modify the default
 timezone for the whole Linux operating system, PHP, and also MySQL.
 
-At PHP since version 8.2 is `TZ` variable set to `'UTC'` by default (otherwise is empty). 
+At PHP since version 8.2 is `TZ` variable set to `'UTC'` by default.
 
 ### Temporary, upload and session storage directory
 
@@ -325,6 +318,3 @@ parameter:
 environment:
     PHP_IDE_CONFIG: "serverName=docker-cli"
 ```
-
-## Building notes
-If you need to build custom images based on this repo, see [Build notes](build-notes.md)

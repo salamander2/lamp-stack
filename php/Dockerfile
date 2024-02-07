@@ -3,6 +3,7 @@ FROM php:8.3-apache-bookworm
 LABEL maintainer="Jakub Bouček <pan@jakubboucek.cz>"
 LABEL org.label-schema.name="PHP 8.3 (Apache module)"
 LABEL org.label-schema.vcs-url="https://github.com/jakubboucek/docker-lamp-devstack"
+LABEL author="Michael Harwood"
 
 # Workdir during installation
 WORKDIR /tmp
@@ -21,12 +22,11 @@ RUN set -eux; \
         git \
         libavif-dev \
         libbz2-dev \
-        libc-client-dev \
         libfreetype6-dev \
         libgmp-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
-        libkrb5-dev \
+        libssl-dev \
         libmemcached-dev \
         libpng-dev \
         libsodium-dev \
@@ -34,15 +34,11 @@ RUN set -eux; \
         libxslt-dev \
         libzip-dev \
         zlib1g-dev \
-        nano \
+        vim \
         openssl \
         tzdata \
         unzip \
         zip; \
-    docker-php-ext-configure \
-        gd --with-avif --with-freetype --with-jpeg --with-webp; \
-    docker-php-ext-configure \
-        imap --with-kerberos --with-imap-ssl; \
     docker-php-ext-install -j$(nproc) \
         bcmath \
         bz2 \
@@ -51,13 +47,10 @@ RUN set -eux; \
         gd \
         gettext \
         gmp \
-        imap \
         intl \
         mysqli \
         opcache \
         pcntl \
-        pdo_mysql \
-        soap \
         sockets \
         sodium \
         sysvmsg \
@@ -66,8 +59,6 @@ RUN set -eux; \
         xsl \
         zip; \
     a2enmod \
-        expires \
-        headers \
         rewrite; \
     apt-get clean -y && \
     apt-get autoclean -y && \
@@ -106,22 +97,23 @@ RUN set -eux; \
     docker-php-ext-enable memcached; \
     rm -rf /tmp/* /var/tmp/*;
 
-# Move Apache Document root to sub-directory `www` (PHP frameworks convention)
-ENV APACHE_DOCUMENT_ROOT /var/www/html/www
+# -- I'm not sure that the following is necessary, since we're using the defaults --#
+# Set Apache document root 
+ENV APACHE_DOCUMENT_ROOT /var/www/html
 
-# Configure Apache listening port
+# Expose Apache listening port
 ENV PORT 80
 
 # Setup Devstack (install Composer, setup DocumentRoot and Port)
 RUN set -eux; \
-    curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php; \
-    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer; \
-    COMPOSER_BIN_DIR=$(composer global config bin-dir --absolute) 2>/dev/null; \
-    echo "export PATH=${COMPOSER_BIN_DIR}:\${PATH}" >> ~/.bashrc; \
     sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf; \
     sed -ri -e 's!:80>!:${PORT}>!g' /etc/apache2/sites-available/*.conf; \
     sed -ri -e 's!Listen 80!Listen ${PORT}!g' /etc/apache2/ports.conf; \
     rm -rf /tmp/*;
 
+RUN echo 'alias ll="ls -l"' >> ~/.bashrc
+
 # Workdir after installation
 WORKDIR /var/www/html
+
+# docker build -t lamp-myphp .
